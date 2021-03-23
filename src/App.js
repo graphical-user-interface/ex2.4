@@ -8,7 +8,12 @@ import {
 	Button,
 	Toolbar,
 	Link,
+	FormControl,
+	FormControlLabel,
+	RadioGroup,
+	Radio,
 	Modal,
+	TextField,
 } from "@material-ui/core"
 
 function rand() {
@@ -39,8 +44,8 @@ const useStyles = makeStyles((theme) => ({
 	modal: {
 		position: "absolute",
 		width: 300,
+		outline: 0,
 		backgroundColor: theme.palette.background.paper,
-		border: "2px solid #000",
 		boxShadow: theme.shadows[5],
 		padding: theme.spacing(2, 4, 3),
 	},
@@ -49,7 +54,8 @@ const useStyles = makeStyles((theme) => ({
 		height: 50,
 		borderRadius: "100%",
 		position: "relative",
-		"&:hover, &:focus,&.active": {
+		cursor: "pointer",
+		"&.active": {
 			"& $shapeBorder": {
 				opacity: 1,
 			},
@@ -78,106 +84,382 @@ const useStyles = makeStyles((theme) => ({
 	row: {
 		marginTop: 20,
 	},
+	button: {
+		marginTop: 10,
+	},
 }))
 export default function App() {
 	const classes = useStyles()
-	const [open, setOpen] = useState(false)
+	//open popup
+	const [openAdd, setOpenAdd] = useState(false)
+	const [openEdit, setOpenEdit] = useState(false)
+	const [openDelete, setOpenDelete] = useState(false)
+	const [openAdjustSpacing, setOpenAdjustSpacing] = useState(false)
+
+	//color options for adding, editing shapes
+	const [colors, setColors] = useState([
+		"red",
+		"blue",
+		"green",
+		"yellow",
+		"cyan",
+		"black",
+		"pink",
+		"purple",
+		"violet",
+		"orange",
+	])
+
+	//default shapes
 	const [shapes, setShapes] = useState([
 		{ color: "red", active: false },
 		{ color: "blue", active: false },
 		{ color: "green", active: false },
 		{ color: "#000", active: false },
 	])
-	const [spacing, setSpacing] = useState(1)
+	const [spacing, setSpacing] = useState(0)
+	const [addValue, setAddValue] = useState(colors[0])
 	const [modalStyle] = useState(getModalStyle)
-	const handleOpen = (e) => {
+	const [spacingValue, setSpacingValue] = useState(spacing)
+	//modals handling
+	const handleOpenAdd = (e) => {
 		e.preventDefault()
-		setOpen(true)
+		setOpenAdd(true)
+	}
+	const handleOpenEdit = (e) => {
+		e.preventDefault()
+		shapes.map((shape) => {
+			if (shape.active) {
+				setAddValue(shape.color)
+			}
+		})
+		setOpenEdit(true)
+	}
+	const handleOpenDelete = (e) => {
+		e.preventDefault()
+		setOpenDelete(true)
+	}
+	const handleOpenAdjustSpacing = (e) => {
+		e.preventDefault()
+		setOpenAdjustSpacing(true)
 	}
 	const handleClose = () => {
-		setOpen(false)
+		setOpenAdd(false)
+		setOpenEdit(false)
+		setOpenDelete(false)
+		setOpenAdjustSpacing(false)
+	}
+	const handleAddChange = (e) => {
+		setAddValue(e.target.value)
+	}
+	const handleAdd = (e) => {
+		e.preventDefault()
+		let newShapes = [...shapes]
+		newShapes.push({ color: addValue, active: false })
+		setShapes(newShapes)
+		handleClose()
+	}
+	const handleEdit = (e) => {
+		e.preventDefault()
+		let newShapes = [...shapes]
+		newShapes.filter((shape) => {
+			if (shape.active) {
+				shape.color = addValue
+			}
+		})
+		setShapes(newShapes)
+		handleClose()
+	}
+	const handleDelete = (e) => {
+		e.preventDefault()
+		let newShapes = []
+		shapes.map((shape) => {
+			if (!shape.active) {
+				newShapes.push(shape)
+			}
+		})
+		setShapes(newShapes)
+		handleClose()
+	}
+	const handleAdjustSpacing = (e) => {
+		e.preventDefault()
+		setSpacing(spacingValue)
+		handleClose()
+	}
+	const changeSpacingNumber = (e) => {
+		setSpacingValue(e.target.value)
 	}
 	const selectShape = (i) => {
 		let newShapes = [...shapes]
-		newShapes[i].active = true
+
+		//toggle active status
+		if (!shapes[i].active) {
+			newShapes.map((shape) => (shape.active = false))
+			newShapes[i].active = true
+		} else {
+			newShapes.map((shape) => (shape.active = false))
+		}
 		setShapes(newShapes)
-		console.log(newShapes)
 	}
+
 	return (
-		<div className={classes.root}>
-			<Container maxWidth='sm'>
-				<Grid container>
-					<Grid item xs={2}></Grid>
-					<Grid item xs={8}>
-						<Paper elevation={2} className={classes.paper}>
-							<AppBar position='relative' color='primary'>
-								<Toolbar variant='dense'>
-									<Grid container justify='space-between'>
-										<Grid item>
-											<Link href='#' color='inherit'>
-												Add
-											</Link>
+		<>
+			<div className={classes.root}>
+				<Container maxWidth='sm'>
+					<Grid container>
+						<Grid item xs={2}></Grid>
+						<Grid item xs={8}>
+							<Paper elevation={2} className={classes.paper}>
+								<AppBar position='relative' color='primary'>
+									<Toolbar variant='dense'>
+										<Grid container justify='space-between'>
+											<Grid item>
+												<Link
+													href='/#!'
+													color='inherit'
+													onClick={handleOpenAdd}>
+													Add
+												</Link>
+											</Grid>
+											<Grid item>
+												<Link
+													href='/#!'
+													color='inherit'
+													onClick={handleOpenEdit}>
+													Edit
+												</Link>
+											</Grid>
+											<Grid item>
+												<Link
+													href='/#!'
+													color='inherit'
+													onClick={handleOpenDelete}>
+													Delete
+												</Link>
+											</Grid>
+											<Grid item>
+												<Link
+													href='/#!'
+													color='inherit'
+													onClick={
+														handleOpenAdjustSpacing
+													}>
+													Adjust spacing
+												</Link>
+											</Grid>
 										</Grid>
-										<Grid item>
-											<Link href='#' color='inherit'>
-												Edit
-											</Link>
+									</Toolbar>
+								</AppBar>
+								<Grid
+									container
+									className={classes.row}
+									spacing={spacing}>
+									{shapes.map((shape, i) => (
+										<Grid key={i} item>
+											<Shape
+												bg={shape.color}
+												active={
+													shape.active ? "active" : ""
+												}
+												selectShape={() =>
+													selectShape(i)
+												}
+											/>
 										</Grid>
-										<Grid item>
-											<Link href='#' color='inherit'>
-												Delete
-											</Link>
-										</Grid>
-										<Grid item>
-											<Link href='#' color='inherit'>
-												Adjust spacing
-											</Link>
-										</Grid>
-									</Grid>
-								</Toolbar>
-							</AppBar>
-							<Grid
-								container
-								className={classes.row}
-								spacing={spacing}>
-								{shapes.map((shape, i) => (
-									<Grid key={i} item>
-										<Shape
-											bg={shape.color}
-											active={
-												shape.active ? "active" : ""
-											}
-											selectShape={() => selectShape(i)}
-										/>
-									</Grid>
-								))}
-							</Grid>
-						</Paper>
+									))}
+								</Grid>
+							</Paper>
+						</Grid>
+						<Grid item xs={2}></Grid>
 					</Grid>
-					<Grid item xs={2}></Grid>
-				</Grid>
-			</Container>
+				</Container>
+			</div>
+			{/* Modal for adding new shapes */}
 			<Modal
-				open={open}
+				style={{ alignItems: "center", justifyContent: "center" }}
+				open={openAdd}
 				onClose={handleClose}
 				aria-labelledby='simple-modal-title'
 				aria-describedby='simple-modal-description'>
 				<div style={modalStyle} className={classes.modal}>
-					<h5 id='simple-modal-title'>About</h5>
+					<h3 id='simple-modal-title'>Add new shape</h3>
 					<p id='simple-modal-description'>
-						Something about this application.
+						Pick the color for new shape.
 					</p>
-					<p>
-						<Button
-							variant='contained'
-							color='primary'
-							onClick={handleClose}>
-							Close
-						</Button>
-					</p>
+					<form onSubmit={handleAdd}>
+						<FormControl component='fieldset'>
+							<RadioGroup
+								aria-label='color'
+								//select the first one as default value
+								defaultValue={colors[0]}
+								onChange={handleAddChange}
+								name='Color'>
+								<Grid container>
+									{colors.map((color, i) => (
+										<Grid item xs={6} key={i}>
+											<FormControlLabel
+												className={classes.radio}
+												value={color}
+												color={color}
+												control={<Radio />}
+												label={color}
+											/>
+										</Grid>
+									))}
+								</Grid>
+							</RadioGroup>
+							<Button
+								variant='contained'
+								color='primary'
+								className={classes.button}
+								type='submit'>
+								Add
+							</Button>
+						</FormControl>
+					</form>
 				</div>
 			</Modal>
-		</div>
+			<Modal
+				style={{ alignItems: "center", justifyContent: "center" }}
+				open={openEdit}
+				onClose={handleClose}
+				aria-labelledby='simple-modal-title'
+				aria-describedby='simple-modal-description'>
+				<div style={modalStyle} className={classes.modal}>
+					<h3 id='simple-modal-title'>Edit shape</h3>
+
+					{shapes.filter((shape) => shape.active).length ? (
+						<>
+							<p id='simple-modal-description'>
+								Edit the color of the chosen shape.
+							</p>
+							<form onSubmit={handleEdit}>
+								<FormControl component='fieldset'>
+									<RadioGroup
+										aria-label='color'
+										//select the first one as default value
+										value={addValue}
+										onChange={handleAddChange}
+										name='Color'>
+										<Grid container>
+											{colors.map((color, i) => (
+												<Grid item xs={6} key={i}>
+													<FormControlLabel
+														className={
+															classes.radio
+														}
+														value={color}
+														color={color}
+														control={<Radio />}
+														label={color}
+													/>
+												</Grid>
+											))}
+										</Grid>
+									</RadioGroup>
+									<Button
+										variant='contained'
+										color='primary'
+										className={classes.button}
+										type='submit'>
+										Edit
+									</Button>
+								</FormControl>
+							</form>
+						</>
+					) : (
+						<div>
+							<p>Please choose a shape to edit</p>
+							<p>
+								<Button
+									variant='contained'
+									color='primary'
+									className={classes.button}
+									onClick={handleClose}>
+									Close
+								</Button>
+							</p>
+						</div>
+					)}
+				</div>
+			</Modal>
+			<Modal
+				style={{ alignItems: "center", justifyContent: "center" }}
+				open={openDelete}
+				onClose={handleClose}
+				aria-labelledby='simple-modal-title'
+				aria-describedby='simple-modal-description'>
+				<div style={modalStyle} className={classes.modal}>
+					<h3 id='simple-modal-title'>Delete shape</h3>
+
+					{shapes.filter((shape) => shape.active).length ? (
+						<>
+							<p id='simple-modal-description'>
+								Are you sure to delete this shape?
+							</p>
+
+							<Button
+								variant='contained'
+								color='primary'
+								className={classes.button}
+								onClick={handleDelete}>
+								Delete
+							</Button>
+						</>
+					) : (
+						<div>
+							<p>Please choose a shape to delete</p>
+							<p>
+								<Button
+									variant='contained'
+									color='primary'
+									className={classes.button}
+									onClick={handleClose}>
+									Close
+								</Button>
+							</p>
+						</div>
+					)}
+				</div>
+			</Modal>
+			<Modal
+				style={{ alignItems: "center", justifyContent: "center" }}
+				open={openAdjustSpacing}
+				onClose={handleClose}
+				aria-labelledby='simple-modal-title'
+				aria-describedby='simple-modal-description'>
+				<div style={modalStyle} className={classes.modal}>
+					<h3 id='simple-modal-title'>Edit shape</h3>
+					<p id='simple-modal-description'>
+						Adjust the spacing between shapes.
+					</p>
+					<form onSubmit={handleAdjustSpacing}>
+						<FormControl component='fieldset'>
+							<TextField
+								id='standard-number'
+								label=''
+								type='number'
+								onChange={changeSpacingNumber}
+								InputProps={{
+									inputProps: {
+										max: 10,
+										min: 1,
+										value: spacingValue,
+									},
+								}}
+							/>
+							<Button
+								variant='contained'
+								color='primary'
+								className={classes.button}
+								onClick={handleAdjustSpacing}>
+								Adjust spacing
+							</Button>
+						</FormControl>
+					</form>
+				</div>
+			</Modal>
+		</>
 	)
 }
 
